@@ -1,0 +1,33 @@
+@import "../../css/units.css";
+
+.target-pane {
+    /* Makes columns for the sprite library selector + and the stage selector */
+    display: flex;
+    flex-direction: row;
+    justify-content: center !important;
+    width: 100%;
+}
+
+.stage-selector-wrapper {
+    display: flex;
+    flex-basis: 80px;
+    flex-shrink: 0;
+}
+
+/* [dir="ltr"] .stage-selector-wrapper {
+    margin-left: calc($space / 2);
+}
+
+[dir="rtl"] .stage-selector-wrapper {
+    margin-right: calc($space / 2);
+} */
+@media screen and (min-device-width: 1200px) and (max-device-width: 1600px) and (-webkit-min-device-pixel-ratio: 1) {
+    .target-pane {
+        height: 50vh;
+    }
+    .stage-selector-wrapper {
+        display: flex;
+        flex-basis: 80px;
+        flex-shrink: 0;
+    }
+}
