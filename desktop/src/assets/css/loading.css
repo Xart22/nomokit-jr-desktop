@@ -1,0 +1,11 @@
+.loading {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 9999;
+  background-image: url("../images/loading.gif");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: rgba(0, 0, 255, 0.3);
+  display: none;
+}

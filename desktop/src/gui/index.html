@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="google" value="notranslate" />
+    <link rel="shortcut icon" href="static/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/loading.css" />
+    <script>
+      HTMLCanvasElement.prototype.getContext = (function (origFn) {
+        return function (type, attribs) {
+          attribs = attribs || {};
+          attribs.preserveDrawingBuffer = true;
+          return origFn.call(this, type, attribs);
+        };
+      })(HTMLCanvasElement.prototype.getContext);
+    </script>
+    <title>Nomokit-Jr</title>
+  </head>
+  <body>
+    <div class="loading" id="loading"></div>
+    <script type="text/javascript" src="lib.min.js"></script>
+    <script type="text/javascript" src="chunks/gui.js"></script>
+  </body>
+</html>

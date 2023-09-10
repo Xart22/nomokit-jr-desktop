@@ -1,0 +1,114 @@
+@font-face {
+  font-family: myFirstFont;
+  src: url("../fonts/HennyPenny-Regular.ttf");
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(248, 188, 92, 1) 0%,
+    rgb(255, 239, 213) 5%
+  );
+  background-attachment: fixed;
+  font-family: myFirstFont;
+  overflow: hidden;
+}
+
+.menu-bar {
+  height: 10vh;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  display: flex;
+  background: linear-gradient(
+    -180deg,
+    rgba(248, 188, 92, 1) 0%,
+    rgb(255, 239, 213) 5%
+  );
+  background-attachment: fixed;
+}
+
+.logo-wraper {
+  width: min-content;
+  padding: 5px;
+  border-bottom: 3px whitesmoke solid;
+  border-right: 3px whitesmoke solid;
+}
+
+.menu-item {
+  padding: 5px;
+  background-color: #8d9ce2;
+}
+
+.logo {
+  height: 8vh;
+}
+
+.divider {
+  border: 2px dashed black;
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
+.active {
+  background-color: #8d9ce2;
+  height: 100px;
+  position: relative;
+  border-bottom: 3px whitesmoke solid;
+  border-right: 3px whitesmoke solid;
+}
+
+.menu-active {
+  background-color: #8d9ce2;
+  padding: 10px;
+  position: fixed;
+  top: 10vh;
+  font-weight: bolder;
+  font-size: xx-large;
+  width: 100%;
+  color: white;
+  padding-left: 5vw;
+}
+.project-wraper {
+  min-height: 200px !important;
+}
+.project-container {
+  margin-top: 25vh;
+  display: flex;
+  padding-left: 70px;
+  flex-wrap: wrap;
+  height: 70vh;
+  overflow: auto;
+}
+.project-item {
+  margin: 20px;
+  margin-left: 35px;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  border: 1px dashed rgb(126, 69, 0);
+  padding: 10px;
+  height: fit-content;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

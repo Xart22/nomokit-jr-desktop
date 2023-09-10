@@ -1,0 +1,24 @@
+{
+  "name": "nomokit-jr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "electron .",
+    "deploy": "electron-builder -p always",
+    "build": "electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "electron": "^26.1.0",
+    "electron-log": "^4.4.8",
+    "electron-updater": "^6.1.1",
+    "node-machine-id": "^1.1.12",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "electron-builder": "^24.6.3"
+  }
+}
