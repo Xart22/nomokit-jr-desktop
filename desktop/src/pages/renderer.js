@@ -4,6 +4,11 @@ const path = require("path");
 const db = require("../db/db.config");
 
 window.addEventListener("DOMContentLoaded", async () => {
+  const body = document.getElementsByTagName("body")[0];
+  const audio = document.getElementById("mouseAudio");
+  body.addEventListener("click", () => {
+    play();
+  });
   let projectData = await getProjectData();
   ipcRenderer.send("getUrlPath", true);
   ipcRenderer.on("reply-getUrlPath", (e, msg) => {
@@ -18,12 +23,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
       const projectContainer = document.getElementById("projectContainer");
       projectData.forEach((item) => {
-        console.log(item);
         const itemContainer = document.createElement("div");
         itemContainer.className = "project-item";
         itemContainer.innerHTML = `<img src="../../storage/${item.file_name}.png" width="170" />
           ${item.project_name}`;
-        console.log(itemContainer.innerHTML);
         itemContainer.onclick = function () {
           loadProject(item.id);
         };
@@ -46,7 +49,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 
       ipcRenderer.on("reply-get-status-project", (e, msg) => {
         if (msg) {
-          console.log(msg);
           const prjTitleInput = document.getElementById("prjTitle");
           prjTitleInput.value = msg.project_name;
           prjData = msg;
@@ -126,5 +128,13 @@ window.addEventListener("DOMContentLoaded", async () => {
         resolve(rows);
       });
     });
+  }
+
+  async function play() {
+    audio.play();
+    setTimeout(function () {
+      audio.pause();
+      audio.currentTime = 0;
+    }, 300);
   }
 });

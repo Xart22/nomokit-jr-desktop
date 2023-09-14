@@ -264,7 +264,7 @@ var handleShowMessageBox = function handleShowMessageBox(type, message) {
   if (false) {}
 
   var onVmInit = function onVmInit(vm) {
-    var prjPath = '../../storage/Nomokit-Jr Project-1694369701284.ob';
+    var prjPath = '';
 
     var projectLoaded = false; // We need to wait the VM start and the default project to be loaded before
     // trying to load the url project, otherwiste we can get a mix of both.

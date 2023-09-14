@@ -34,7 +34,7 @@ const createLoading = () => {
     resizable: false,
     transparent: true,
     hasShadow: false,
-    icon: path.join(__dirname, "/src/assets/images/nomokit-jr.png"),
+    icon: path.join(__dirname, "/src/assets/images/icon.png"),
     webPreferences: {
       contextIsolation: false,
       nodeIntegration: false,
@@ -52,7 +52,7 @@ const createMainPage = () => {
     height: 900,
     minHeight: 1400,
     minWidth: 900,
-    icon: path.join(__dirname, "/src/assets/images/nomokit-jr.png"),
+    icon: path.join(__dirname, "/src/assets/images/icon.png"),
     title: "Nomokit-Jr" + " - " + "v" + app.getVersion(),
     webPreferences: {
       nodeIntegration: true,
@@ -63,7 +63,7 @@ const createMainPage = () => {
   });
 
   window.loadFile(path.join(__dirname, "/src/pages/home.html"));
-  window.webContents.openDevTools();
+  // window.webContents.openDevTools();
 
   return window;
 };
@@ -80,7 +80,6 @@ app.whenReady().then(() => {
 let prjDataSelected = null;
 
 ipcMain.on("getUrlPath", (e, msg) => {
-  console.log(_windows.main.webContents.getURL());
   e.reply("reply-getUrlPath", _windows.main.webContents.getURL());
 });
 
@@ -128,7 +127,6 @@ ipcMain.on("get-status-project", (e, msg) => {
 
 ipcMain.on("back-to-home", (e, msg) => {
   prjDataSelected = null;
-  console.log(_windows.main.webContents);
   _windows.main.webContents.close();
   _windows.main = createMainPage();
 });
