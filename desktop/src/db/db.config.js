@@ -1,5 +1,5 @@
 const sqlite3 = require("sqlite3").verbose();
-const dbFile = __dirname + "/project.db";
+const dbFile = __dirname + "/database.db";
 
 const db = new sqlite3.Database(dbFile, sqlite3.OPEN_READWRITE, (err) => {
   if (err) throw err;

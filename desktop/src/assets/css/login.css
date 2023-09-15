@@ -1,0 +1,13 @@
+body {
+  margin: 0;
+  background-color: hsla(229, 100%, 29%, 1);
+  overflow: hidden;
+  background-attachment: fixed;
+  color: white;
+}
+main {
+  margin: 20vh;
+}
+.bg-main {
+  background-color: hsla(229, 100%, 29%, 1);
+}

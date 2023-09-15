@@ -5,6 +5,7 @@ const getHwid = require("node-machine-id").machineIdSync;
 const logger = require("electron-log");
 const path = require("path");
 const db = require("./src/db/db.config");
+const axios = require("axios");
 
 logger.transports.file.level = "info";
 autoUpdater.logger = logger;
@@ -16,13 +17,25 @@ autoUpdater.autoInstallOnAppQuit = false;
 const _windows = {};
 
 // Loading
-const createLoading = () => {
-  const query = `CREATE TABLE IF NOT EXISTS project (
+const createLoading = async () => {
+  const queryCreateUserData = `CREATE TABLE IF NOT EXISTS user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email VARCHAR(255),
+    user_name VARCHAR(255),
+    password VARCHAR(255),
+    token VARCHAR(255)
+  );`;
+  db.run(queryCreateUserData, (err, result) => {
+    if (err) throw err;
+    console.log("Table created");
+  });
+  const queryCreateTableProject = `CREATE TABLE IF NOT EXISTS project (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     project_name VARCHAR(255),
     file_name VARCHAR(255) UNIQUE
-  );`;
-  db.run(query, (err, result) => {
+  );
+  `;
+  db.run(queryCreateTableProject, (err, result) => {
     if (err) throw err;
     console.log("Table created");
   });
@@ -63,21 +76,71 @@ const createMainPage = () => {
   });
 
   window.loadFile(path.join(__dirname, "/src/pages/home.html"));
-  // window.webContents.openDevTools();
+  window.webContents.openDevTools();
 
   return window;
 };
 
-app.whenReady().then(() => {
-  _windows.loading = createLoading();
+app.whenReady().then(async () => {
+  _windows.loading = await createLoading();
+  const userData = await checkUserData(1);
   setTimeout(function () {
     _windows.loading.close();
     delete _windows.loading;
     _windows.main = createMainPage();
+    if (userData == undefined) {
+      _windows.main.webContents.loadFile(
+        path.join(__dirname, "/src/pages/login.html")
+      );
+    }
   }, 3000);
 });
 
 let prjDataSelected = null;
+
+ipcMain.on("login", async (event, arg) => {
+  const hwid = getHwid();
+  arg.hwid = hwid;
+  arg.app = "nomopro";
+  await axios
+    .post("https://nomo-kit.com/api/login", arg)
+    .then(async (res) => {
+      if (res.data.user.subscriptions == null) {
+        if (res.data.user.trial != null) {
+          res.data.user.subscriptions = res.data.user.trial;
+        }
+      }
+      if (res.data.user.subscriptions == null) {
+        event.reply("no-subscription", res.data);
+        await axios.get("https://nomo-kit.com/api/logout", {
+          headers: { Authorization: "Bearer " + res.data.token },
+        });
+      } else {
+        if (res.data.user.subscriptions.is_active == 0) {
+          event.reply("no-subscription", res.data);
+          arg.status = "fail";
+          await axios.get("https://nomo-kit.com/api/logout", {
+            headers: { Authorization: "Bearer " + res.data.token },
+          });
+        } else {
+          await fs.writeFileSync(
+            path.join(__dirname, "/data/user.json"),
+            JSON.stringify(res.data)
+          );
+          token = await JSON.parse(
+            fs.readFileSync(path.join(__dirname, "data/user.json"), "utf8")
+          );
+          _windows.main.webContents.loadFile(
+            path.join(__dirname, "/src/pages/home.html")
+          );
+        }
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      event.reply("login-fail", err.response.data);
+    });
+});
 
 ipcMain.on("getUrlPath", (e, msg) => {
   e.reply("reply-getUrlPath", _windows.main.webContents.getURL());
@@ -134,6 +197,49 @@ ipcMain.on("back-to-home", (e, msg) => {
 async function getProjectDataById(id) {
   return new Promise((resolve, reject) => {
     db.get(`SELECT * FROM project WHERE id = ${id}`, (err, rows) => {
+      if (err) reject(err);
+      resolve(rows);
+    });
+  });
+}
+
+async function checkUserData() {
+  const userData = await getProjectUserDataById(1);
+  return userData;
+}
+
+async function writeOrUpdateUserData() {
+  const userData = await checkUserData();
+  if (userData != undefined) {
+    db.run(
+      `UPDATE project SET project_name="${projectName.toString()}", file_name="${fileName}" WHERE id = ?`,
+      [prjData.id],
+      (err) => {
+        if (err) console.log(err);
+      }
+    );
+  } else {
+    db.run(
+      `INSERT INTO project (project_name, file_name) VALUES (?,?)`,
+      [projectName.toString(), fileName],
+      (err) => {
+        if (err) console.log(err);
+      }
+    );
+  }
+
+  db.run(
+    `UPDATE project SET project_name="${projectName.toString()}", file_name="${fileName}" WHERE id = ?`,
+    [prjData.id],
+    (err) => {
+      if (err) console.log(err);
+    }
+  );
+}
+
+async function getProjectUserDataById(id) {
+  return new Promise((resolve, reject) => {
+    db.get(`SELECT * FROM user WHERE id = ${id}`, (err, rows) => {
       if (err) reject(err);
       resolve(rows);
     });
