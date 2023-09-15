@@ -8,18 +8,45 @@
     "deploy": "electron-builder -p always",
     "build": "electron-builder"
   },
+  "repository": "https://github.com/Xart22/nomokit-jr-desktop",
   "keywords": [],
-  "author": "",
+  "author": "Sonasoft",
+  "build": {
+    "appId": "com.nomokit-jr.desktop",
+    "productName": "Nomokit-Jr",
+    "asar": false,
+    "win": {
+      "publish": [
+        "github"
+      ],
+      "target": [
+        "nsis"
+      ],
+      "icon": "src/assets/images/nomokit-jr.png",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "nsis": {
+      "artifactName": "Nomokit-Jr-${version}.${ext}",
+      "oneClick": false,
+      "uninstallDisplayName": "Nomokit-Jr-uninstaller",
+      "installerIcon": "src/assets/images/nomokit-jr.ico",
+      "shortcutName": "Nomokit-Jr",
+      "runAfterFinish": true,
+      "allowToChangeInstallationDirectory": false,
+      "perMachine": true,
+      "include": "buildResource/installer.nsh"
+    }
+  },
   "license": "ISC",
   "dependencies": {
     "axios": "^1.5.0",
-    "electron": "^26.1.0",
     "electron-log": "^4.4.8",
     "electron-updater": "^6.1.1",
     "node-machine-id": "^1.1.12",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
-    "electron-builder": "^24.6.3"
+    "electron-builder": "^24.6.3",
+    "electron": "^26.1.0"
   }
 }

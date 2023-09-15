@@ -25,19 +25,26 @@ const createLoading = async () => {
     password VARCHAR(255),
     token VARCHAR(255)
   );`;
-  db.run(queryCreateUserData, (err, result) => {
-    if (err) throw err;
-    console.log("Table created");
+
+  await new Promise((resolve, reject) => {
+    db.run(queryCreateUserData, (err, result) => {
+      if (err) throw err;
+      resolve("Table created");
+    });
   });
+
   const queryCreateTableProject = `CREATE TABLE IF NOT EXISTS project (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     project_name VARCHAR(255),
     file_name VARCHAR(255) UNIQUE
   );
   `;
-  db.run(queryCreateTableProject, (err, result) => {
-    if (err) throw err;
-    console.log("Table created");
+
+  await new Promise((resolve, reject) => {
+    db.run(queryCreateTableProject, (err, result) => {
+      if (err) throw err;
+      resolve("Table created");
+    });
   });
 
   const window = new BrowserWindow({
@@ -75,25 +82,82 @@ const createMainPage = () => {
     },
   });
 
-  window.loadFile(path.join(__dirname, "/src/pages/home.html"));
-  window.webContents.openDevTools();
+  //window.loadFile(path.join(__dirname, "/src/pages/home.html"));
+  //window.webContents.openDevTools();
 
   return window;
 };
 
 app.whenReady().then(async () => {
   _windows.loading = await createLoading();
-  const userData = await checkUserData(1);
-  setTimeout(function () {
+  const userData = await getUserData();
+  setTimeout(async function () {
     _windows.loading.close();
     delete _windows.loading;
     _windows.main = createMainPage();
-    if (userData == undefined) {
+
+    if (userData == undefined || userData.token == 0) {
       _windows.main.webContents.loadFile(
         path.join(__dirname, "/src/pages/login.html")
       );
+    } else {
+      const userToken = await checkUserToken(userData.token);
+
+      if (userToken.subscriptions != null) {
+        if (userToken.subscriptions.is_active == 0) {
+          await writeOrUpdateUserData("0", "0", "0", "0");
+          _windows.main.webContents.loadFile(
+            path.join(__dirname, "/src/pages/login.html")
+          );
+        } else {
+          _windows.main.webContents.loadFile(
+            path.join(__dirname, "/src/pages/home.html")
+          );
+        }
+      } else if (userToken.trial != null) {
+        if (userToken.trial.is_active == 0) {
+          await writeOrUpdateUserData("0", "0", "0", "0");
+          _windows.main.webContents.loadFile(
+            path.join(__dirname, "/src/pages/login.html")
+          );
+        } else {
+          _windows.main.webContents.loadFile(
+            path.join(__dirname, "/src/pages/home.html")
+          );
+        }
+      }
     }
   }, 3000);
+});
+
+app.on("ready", async () => {
+  autoUpdater.checkForUpdatesAndNotify();
+
+  autoUpdater.on("update-available", () => {
+    autoUpdater.downloadUpdate();
+  });
+
+  autoUpdater.on("update-downloaded", () => {
+    dialog
+      .showMessageBox({
+        type: "question",
+        title: "Update available",
+        message: "Update Version is available, will be installed on restart",
+        buttons: ["Yes", "No"],
+        yes: 0,
+        no: 1,
+      })
+      .then((result) => {
+        if (result.response === 0) {
+          app.exit();
+          autoUpdater.quitAndInstall(false, false);
+        }
+      });
+  });
+
+  autoUpdater.on("error", (err) => {
+    dialog.showErrorBox("Error: ", err == null ? "unknown" : err);
+  });
 });
 
 let prjDataSelected = null;
@@ -101,7 +165,7 @@ let prjDataSelected = null;
 ipcMain.on("login", async (event, arg) => {
   const hwid = getHwid();
   arg.hwid = hwid;
-  arg.app = "nomopro";
+  arg.app = "nomokit-jr";
   await axios
     .post("https://nomo-kit.com/api/login", arg)
     .then(async (res) => {
@@ -123,12 +187,11 @@ ipcMain.on("login", async (event, arg) => {
             headers: { Authorization: "Bearer " + res.data.token },
           });
         } else {
-          await fs.writeFileSync(
-            path.join(__dirname, "/data/user.json"),
-            JSON.stringify(res.data)
-          );
-          token = await JSON.parse(
-            fs.readFileSync(path.join(__dirname, "data/user.json"), "utf8")
+          await writeOrUpdateUserData(
+            res.data.user.email,
+            res.data.user.name,
+            arg.password,
+            res.data.token
           );
           _windows.main.webContents.loadFile(
             path.join(__dirname, "/src/pages/home.html")
@@ -203,45 +266,44 @@ async function getProjectDataById(id) {
   });
 }
 
-async function checkUserData() {
-  const userData = await getProjectUserDataById(1);
-  return userData;
-}
-
-async function writeOrUpdateUserData() {
-  const userData = await checkUserData();
+async function writeOrUpdateUserData(email, username, password, token) {
+  const userData = await getUserData();
   if (userData != undefined) {
     db.run(
-      `UPDATE project SET project_name="${projectName.toString()}", file_name="${fileName}" WHERE id = ?`,
-      [prjData.id],
+      `UPDATE user SET email="${email}", user_name="${username}",password="${password}",token="${token}" WHERE id = 1`,
       (err) => {
         if (err) console.log(err);
       }
     );
   } else {
     db.run(
-      `INSERT INTO project (project_name, file_name) VALUES (?,?)`,
-      [projectName.toString(), fileName],
+      `INSERT INTO user (email, user_name,password,token) VALUES (?,?,?,?)`,
+      [email, username, password, token],
       (err) => {
         if (err) console.log(err);
       }
     );
   }
-
-  db.run(
-    `UPDATE project SET project_name="${projectName.toString()}", file_name="${fileName}" WHERE id = ?`,
-    [prjData.id],
-    (err) => {
-      if (err) console.log(err);
-    }
-  );
 }
 
-async function getProjectUserDataById(id) {
+async function getUserData() {
   return new Promise((resolve, reject) => {
-    db.get(`SELECT * FROM user WHERE id = ${id}`, (err, rows) => {
+    db.get(`SELECT * FROM user WHERE id = 1`, (err, rows) => {
       if (err) reject(err);
       resolve(rows);
     });
   });
+}
+
+async function checkUserToken(token) {
+  return await axios
+    .get("https://nomo-kit.com/api/user", {
+      headers: { Authorization: "Bearer " + token },
+    })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      app.relaunch();
+    });
 }
