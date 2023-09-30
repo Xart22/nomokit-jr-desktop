@@ -22,7 +22,7 @@
       "target": [
         "nsis"
       ],
-      "icon": "src/assets/images/nomokit-jr.png",
+      "icon": "src/assets/images/icon.png",
       "requestedExecutionLevel": "requireAdministrator"
     },
     "nsis": {

@@ -9,7 +9,7 @@ const axios = require("axios");
 
 logger.transports.file.level = "info";
 autoUpdater.logger = logger;
-autoUpdater.autoDownload = false;
+autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = false;
 
 // Menu Template
@@ -69,9 +69,9 @@ const createLoading = async () => {
 const createMainPage = () => {
   const window = new BrowserWindow({
     width: 1400,
-    height: 900,
-    minHeight: 1400,
-    minWidth: 900,
+    height: 800,
+    minHeight: 800,
+    minWidth: 1400,
     icon: path.join(__dirname, "/src/assets/images/icon.png"),
     title: "Nomokit-Jr" + " - " + "v" + app.getVersion(),
     webPreferences: {
@@ -81,9 +81,9 @@ const createMainPage = () => {
       enableRemoteModule: true,
     },
   });
-
+  window.setMenuBarVisibility(false);
   //window.loadFile(path.join(__dirname, "/src/pages/home.html"));
-  //window.webContents.openDevTools();
+  window.webContents.openDevTools();
 
   return window;
 };
@@ -95,6 +95,33 @@ app.whenReady().then(async () => {
     _windows.loading.close();
     delete _windows.loading;
     _windows.main = createMainPage();
+    autoUpdater.checkForUpdates();
+
+    autoUpdater.on("update-available", () => {
+      autoUpdater.downloadUpdate();
+    });
+
+    autoUpdater.on("update-downloaded", () => {
+      dialog
+        .showMessageBox({
+          type: "question",
+          title: "Update available",
+          message: "Update Version is available, will be installed on restart",
+          buttons: ["Yes", "No"],
+          yes: 0,
+          no: 1,
+        })
+        .then((result) => {
+          if (result.response === 0) {
+            autoUpdater.quitAndInstall(false, true);
+            app.quit();
+          }
+        });
+    });
+
+    autoUpdater.on("error", (err) => {
+      dialog.showErrorBox("Error: ", err == null ? "unknown" : err);
+    });
 
     if (userData == undefined || userData.token == 0) {
       _windows.main.webContents.loadFile(
@@ -128,36 +155,6 @@ app.whenReady().then(async () => {
       }
     }
   }, 3000);
-});
-
-app.on("ready", async () => {
-  autoUpdater.checkForUpdatesAndNotify();
-
-  autoUpdater.on("update-available", () => {
-    autoUpdater.downloadUpdate();
-  });
-
-  autoUpdater.on("update-downloaded", () => {
-    dialog
-      .showMessageBox({
-        type: "question",
-        title: "Update available",
-        message: "Update Version is available, will be installed on restart",
-        buttons: ["Yes", "No"],
-        yes: 0,
-        no: 1,
-      })
-      .then((result) => {
-        if (result.response === 0) {
-          app.exit();
-          autoUpdater.quitAndInstall(false, false);
-        }
-      });
-  });
-
-  autoUpdater.on("error", (err) => {
-    dialog.showErrorBox("Error: ", err == null ? "unknown" : err);
-  });
 });
 
 let prjDataSelected = null;
@@ -253,9 +250,12 @@ ipcMain.on("get-status-project", (e, msg) => {
 
 ipcMain.on("back-to-home", (e, msg) => {
   prjDataSelected = null;
-  _windows.main.webContents.close();
-  _windows.main = createMainPage();
+  _windows.main.webContents.loadFile(
+    path.join(__dirname, "/src/pages/home.html")
+  );
 });
+
+ipcMain.on("dbPath", (e, msg) => e.reply(app.getPath("documents")));
 
 async function getProjectDataById(id) {
   return new Promise((resolve, reject) => {

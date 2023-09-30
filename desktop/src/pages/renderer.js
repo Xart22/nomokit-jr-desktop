@@ -1,4 +1,4 @@
-const { ipcRenderer, shell, remote } = require("electron");
+const { ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const db = require("../db/db.config");
@@ -84,6 +84,18 @@ window.addEventListener("DOMContentLoaded", async () => {
           ${item.project_name}`;
         itemContainer.onclick = function () {
           loadProject(item.id);
+        };
+        itemContainer.oncontextmenu = () => {
+          if (confirm("Export this Project ?")) {
+            const anchor = document.createElement("a");
+            anchor.display = "none";
+            anchor.download = item.file_name + ".ob";
+            anchor.href = `../../storage/${item.file_name}.ob`;
+            anchor.click();
+            window.setTimeout(() => {
+              document.body.removeChild(anchor);
+            }, 1000);
+          }
         };
         projectContainer.appendChild(itemContainer);
       });
