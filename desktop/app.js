@@ -6,11 +6,17 @@ const logger = require("electron-log");
 const path = require("path");
 const db = require("./src/db/db.config");
 const axios = require("axios");
+const OpenBlockLink = require("./src/link/src");
 
 logger.transports.file.level = "info";
 autoUpdater.logger = logger;
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = false;
+
+const link = new OpenBlockLink();
+//  START: Link server
+link.listen();
+logger.info("Link server started");
 
 // Menu Template
 
@@ -83,7 +89,7 @@ const createMainPage = () => {
   });
   window.setMenuBarVisibility(false);
   //window.loadFile(path.join(__dirname, "/src/pages/home.html"));
-  window.webContents.openDevTools();
+  //window.webContents.openDevTools();
 
   return window;
 };
@@ -129,7 +135,11 @@ app.whenReady().then(async () => {
       );
     } else {
       const userToken = await checkUserToken(userData.token);
-
+      if (userToken == undefined) {
+        _windows.main.webContents.loadFile(
+          path.join(__dirname, "/src/pages/login.html")
+        );
+      }
       if (userToken.subscriptions != null) {
         if (userToken.subscriptions.is_active == 0) {
           await writeOrUpdateUserData("0", "0", "0", "0");
@@ -233,7 +243,7 @@ ipcMain.on("load-project", async (e, msg) => {
       path.join(__dirname, "src/gui/chunks/gui.js"),
       guiCp.replace(
         "var prjPath = '';",
-        `var prjPath = '../../storage/${prjDataSelected.file_name}.ob';`
+        `var prjPath = '../../db/project/${prjDataSelected.file_name}.ob';`
       )
     );
     _windows.main.webContents.loadFile(
@@ -250,9 +260,13 @@ ipcMain.on("get-status-project", (e, msg) => {
 
 ipcMain.on("back-to-home", (e, msg) => {
   prjDataSelected = null;
-  _windows.main.webContents.loadFile(
+  _windows.main2 = createMainPage();
+  _windows.main.webContents.close();
+  delete _windows.main;
+  _windows.main2.webContents.loadFile(
     path.join(__dirname, "/src/pages/home.html")
   );
+  _windows.main = _windows.main2;
 });
 
 ipcMain.on("dbPath", (e, msg) => e.reply(app.getPath("documents")));

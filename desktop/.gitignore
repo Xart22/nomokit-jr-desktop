@@ -1,4 +1,5 @@
 /node_modules
 /storage/*
-/db/*.db
+/src/db/*.db
 /dist
+/db

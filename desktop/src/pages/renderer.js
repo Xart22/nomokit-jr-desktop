@@ -2,6 +2,9 @@ const { ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const db = require("../db/db.config");
+const dirProject = path.join(
+  __dirname.replace("\\src\\pages", "") + "/db/project"
+);
 
 window.addEventListener("DOMContentLoaded", async () => {
   const body = document.getElementsByTagName("body")[0];
@@ -80,7 +83,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       projectData.forEach((item) => {
         const itemContainer = document.createElement("div");
         itemContainer.className = "project-item";
-        itemContainer.innerHTML = `<img src="../../storage/${item.file_name}.png" width="170" />
+        itemContainer.innerHTML = `<img src="${dirProject}/${item.file_name}.png" width="170" />
           ${item.project_name}`;
         itemContainer.onclick = function () {
           loadProject(item.id);
@@ -90,7 +93,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             const anchor = document.createElement("a");
             anchor.display = "none";
             anchor.download = item.file_name + ".ob";
-            anchor.href = `../../storage/${item.file_name}.ob`;
+            anchor.href = `${dirProject}/${item.file_name}.ob`;
             anchor.click();
             window.setTimeout(() => {
               document.body.removeChild(anchor);
@@ -142,8 +145,8 @@ window.addEventListener("DOMContentLoaded", async () => {
                   if (err) console.log(err);
                 }
               );
-              fs.unlinkSync("storage/" + prjData.file_name + ".png");
-              fs.unlinkSync("storage/" + prjData.file_name + ".ob");
+              fs.unlinkSync("${dirProject}/" + prjData.file_name + ".png");
+              fs.unlinkSync("${dirProject}/" + prjData.file_name + ".ob");
             } else {
               db.run(
                 `INSERT INTO project (project_name, file_name) VALUES (?,?)`,
@@ -155,7 +158,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             }
 
             fs.writeFileSync(
-              `storage/${fileName}.png`,
+              `${dirProject}/${fileName}.png`,
               img.toDataURL().split(",")[1],
               "base64"
             );
@@ -182,7 +185,10 @@ window.addEventListener("DOMContentLoaded", async () => {
       })
       .then((arrayBuffer) => {
         if (arrayBuffer) {
-          fs.writeFileSync(`storage/${fileName}.ob`, Buffer.from(arrayBuffer));
+          fs.writeFileSync(
+            `${dirProject}/${fileName}.ob`,
+            Buffer.from(arrayBuffer)
+          );
         }
       })
       .catch((e) => console.log(e));
