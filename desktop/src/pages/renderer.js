@@ -1,19 +1,58 @@
-const { ipcRenderer } = require("electron");
+const { ipcRenderer, contextBridge } = require("electron");
 const fs = require("fs");
-const path = require("path");
-const db = require("../db/db.config");
-const dirProject = path.join(
-  __dirname.replace("\\src\\pages", "") + "/db/project"
-);
+const sqlite3 = require("sqlite3").verbose();
+
+console.log("renderer");
+
+let dirProject = "";
+let dbPath = "";
+let db;
+let projectData = [];
 
 window.addEventListener("DOMContentLoaded", async () => {
+  ipcRenderer.send("getPath", true);
+  ipcRenderer.on("reply-getPath", async (e, msg) => {
+    dirProject = msg.dirProject;
+    dbPath = msg.dbFile;
+    db = new sqlite3.Database(msg.dbFile, sqlite3.OPEN_READWRITE, (err) => {
+      if (err) throw err;
+    });
+    projectData = await getProjectData();
+    const projectContainer = document.getElementById("projectContainer");
+    projectData.forEach((item) => {
+      const itemContainer = document.createElement("div");
+      itemContainer.className = "project-item";
+      itemContainer.innerHTML = `<img src="${dirProject}/${item.file_name}.png" width="170" />
+          ${item.project_name}`;
+      itemContainer.onclick = function () {
+        loadProject(item.id);
+      };
+      itemContainer.oncontextmenu = () => {
+        if (confirm("Export this Project ?")) {
+          const anchor = document.createElement("a");
+          anchor.display = "none";
+          anchor.download = item.file_name + ".ob";
+          anchor.href = `${dirProject}/${item.file_name}.ob`;
+          anchor.click();
+          window.setTimeout(() => {
+            document.body.removeChild(anchor);
+          }, 1000);
+        }
+      };
+      projectContainer.appendChild(itemContainer);
+    });
+
+    function loadProject(project_id) {
+      ipcRenderer.send("load-project", project_id);
+    }
+  });
+
   const body = document.getElementsByTagName("body")[0];
   const audio = document.getElementById("mouseAudio");
   body.addEventListener("click", () => {
     play();
   });
 
-  let projectData = await getProjectData();
   ipcRenderer.send("getUrlPath", true);
   ipcRenderer.on("reply-getUrlPath", (e, msg) => {
     let urlPath = "";
@@ -78,34 +117,6 @@ window.addEventListener("DOMContentLoaded", async () => {
       newPrjBtn.addEventListener("click", () => {
         ipcRenderer.send("new-project", true);
       });
-
-      const projectContainer = document.getElementById("projectContainer");
-      projectData.forEach((item) => {
-        const itemContainer = document.createElement("div");
-        itemContainer.className = "project-item";
-        itemContainer.innerHTML = `<img src="${dirProject}/${item.file_name}.png" width="170" />
-          ${item.project_name}`;
-        itemContainer.onclick = function () {
-          loadProject(item.id);
-        };
-        itemContainer.oncontextmenu = () => {
-          if (confirm("Export this Project ?")) {
-            const anchor = document.createElement("a");
-            anchor.display = "none";
-            anchor.download = item.file_name + ".ob";
-            anchor.href = `${dirProject}/${item.file_name}.ob`;
-            anchor.click();
-            window.setTimeout(() => {
-              document.body.removeChild(anchor);
-            }, 1000);
-          }
-        };
-        projectContainer.appendChild(itemContainer);
-      });
-
-      function loadProject(project_id) {
-        ipcRenderer.send("load-project", project_id);
-      }
     }
 
     if (urlPath.includes("gui")) {
@@ -145,8 +156,8 @@ window.addEventListener("DOMContentLoaded", async () => {
                   if (err) console.log(err);
                 }
               );
-              fs.unlinkSync("${dirProject}/" + prjData.file_name + ".png");
-              fs.unlinkSync("${dirProject}/" + prjData.file_name + ".ob");
+              fs.unlinkSync(dirProject + "/" + prjData.file_name + ".png");
+              fs.unlinkSync(dirProject + "/" + prjData.file_name + ".ob");
             } else {
               db.run(
                 `INSERT INTO project (project_name, file_name) VALUES (?,?)`,
@@ -198,6 +209,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     return new Promise((resolve, reject) => {
       db.all("SELECT * FROM project", (err, rows) => {
         if (err) reject(err);
+        console.log(rows);
         resolve(rows);
       });
     });

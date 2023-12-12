@@ -4,7 +4,7 @@ const { autoUpdater } = require("electron-updater");
 const getHwid = require("node-machine-id").machineIdSync;
 const logger = require("electron-log");
 const path = require("path");
-const db = require("./src/db/db.config");
+const sqlite3 = require("sqlite3").verbose();
 const axios = require("axios");
 const OpenBlockLink = require("./src/link/src");
 
@@ -12,6 +12,21 @@ logger.transports.file.level = "info";
 autoUpdater.logger = logger;
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = false;
+
+const dbPath = path.join(app.getPath("documents") + "/Nomokit-Jr/db");
+const dirProject = dbPath.replace("/db", "") + "/project";
+
+if (!fs.existsSync(dbPath)) {
+  fs.mkdirSync(dbPath, { recursive: true });
+  fs.mkdirSync(dirProject);
+  fs.writeFileSync(dbPath + "/db.db", "");
+}
+
+const dbFile = dbPath + "/db.db";
+
+const db = new sqlite3.Database(dbFile, sqlite3.OPEN_READWRITE, (err) => {
+  if (err) throw err;
+});
 
 const link = new OpenBlockLink();
 //  START: Link server
@@ -95,13 +110,13 @@ const createMainPage = () => {
 };
 
 app.whenReady().then(async () => {
+  autoUpdater.checkForUpdates();
   _windows.loading = await createLoading();
   const userData = await getUserData();
   setTimeout(async function () {
     _windows.loading.close();
     delete _windows.loading;
     _windows.main = createMainPage();
-    autoUpdater.checkForUpdates();
 
     autoUpdater.on("update-available", () => {
       autoUpdater.downloadUpdate();
@@ -120,7 +135,6 @@ app.whenReady().then(async () => {
         .then((result) => {
           if (result.response === 0) {
             autoUpdater.quitAndInstall(false, true);
-            app.quit();
           }
         });
     });
@@ -231,6 +245,7 @@ ipcMain.on("new-project", (e, msg) => {
 });
 
 ipcMain.on("load-project", async (e, msg) => {
+  console.log(app.getPath("documents"));
   prjDataSelected = await getProjectDataById(msg);
   fs.unlinkSync(path.join(__dirname, "src/gui/chunks/gui.js"));
   try {
@@ -238,12 +253,15 @@ ipcMain.on("load-project", async (e, msg) => {
       path.join(__dirname, "src/gui/chunks/gui-copy.js"),
       "utf8"
     );
-
+    const pathFolder = app.getPath("documents") + "/Nomokit-jr/db/project";
+    //change path to url_encode
+    const realPath = pathFolder.replace(/\\/g, "/");
+    console.log(realPath);
     fs.writeFileSync(
       path.join(__dirname, "src/gui/chunks/gui.js"),
       guiCp.replace(
         "var prjPath = '';",
-        `var prjPath = '../../db/project/${prjDataSelected.file_name}.ob';`
+        `var prjPath ='${realPath}/${prjDataSelected.file_name}.ob';`
       )
     );
     _windows.main.webContents.loadFile(
@@ -269,7 +287,9 @@ ipcMain.on("back-to-home", (e, msg) => {
   _windows.main = _windows.main2;
 });
 
-ipcMain.on("dbPath", (e, msg) => e.reply(app.getPath("documents")));
+ipcMain.on("getPath", async (e, msg) => {
+  e.reply("reply-getPath", { dbFile, dirProject });
+});
 
 async function getProjectDataById(id) {
   return new Promise((resolve, reject) => {
