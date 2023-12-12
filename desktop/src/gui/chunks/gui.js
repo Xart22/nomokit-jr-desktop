@@ -264,7 +264,7 @@ var handleShowMessageBox = function handleShowMessageBox(type, message) {
   if (false) {}
 
   var onVmInit = function onVmInit(vm) {
-    var prjPath ='C:/Users/fajar/OneDrive/Documents/Nomokit-jr/db/project/Nomokit-Jr Project-1702372118585.ob';
+    var prjPath ='C:/Users/fajar/OneDrive/Documents/Nomokit-jr/project/Nomokit-Jr Project-1702395112852.ob';
 
     var projectLoaded = false; // We need to wait the VM start and the default project to be loaded before
     // trying to load the url project, otherwiste we can get a mix of both.

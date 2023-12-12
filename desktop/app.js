@@ -14,7 +14,7 @@ autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = false;
 
 const dbPath = path.join(app.getPath("documents") + "/Nomokit-Jr/db");
-const dirProject = dbPath.replace("/db", "") + "/project";
+const dirProject = dbPath.replace("db", "project");
 
 if (!fs.existsSync(dbPath)) {
   fs.mkdirSync(dbPath, { recursive: true });
@@ -104,7 +104,7 @@ const createMainPage = () => {
   });
   window.setMenuBarVisibility(false);
   //window.loadFile(path.join(__dirname, "/src/pages/home.html"));
-  //window.webContents.openDevTools();
+  // window.webContents.openDevTools();
 
   return window;
 };
@@ -117,10 +117,6 @@ app.whenReady().then(async () => {
     _windows.loading.close();
     delete _windows.loading;
     _windows.main = createMainPage();
-
-    autoUpdater.on("update-available", () => {
-      autoUpdater.downloadUpdate();
-    });
 
     autoUpdater.on("update-downloaded", () => {
       dialog
@@ -253,7 +249,7 @@ ipcMain.on("load-project", async (e, msg) => {
       path.join(__dirname, "src/gui/chunks/gui-copy.js"),
       "utf8"
     );
-    const pathFolder = app.getPath("documents") + "/Nomokit-jr/db/project";
+    const pathFolder = app.getPath("documents") + "/Nomokit-jr/project";
     //change path to url_encode
     const realPath = pathFolder.replace(/\\/g, "/");
     console.log(realPath);

@@ -13,6 +13,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   ipcRenderer.send("getPath", true);
   ipcRenderer.on("reply-getPath", async (e, msg) => {
     dirProject = msg.dirProject;
+    console.log(dirProject);
     dbPath = msg.dbFile;
     db = new sqlite3.Database(msg.dbFile, sqlite3.OPEN_READWRITE, (err) => {
       if (err) throw err;
