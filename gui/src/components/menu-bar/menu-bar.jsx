@@ -66,6 +66,9 @@ import {
     openEditMenu,
     closeEditMenu,
     editMenuOpen,
+    openLearnMenu,
+    closeLearnMenu,
+    learnMenuOpen,
     openSettingMenu,
     closeSettingMenu,
     settingMenuOpen,
@@ -140,6 +143,11 @@ const ariaMessages = defineMessages({
         id: "gui.menuBar.wiki",
         defaultMessage: "Wiki",
         description: "accessibility text for the wiki button",
+    },
+    learn: {
+        id: "gui.menuBar.learn",
+        defaultMessage: "Learn",
+        description: "accessibility text for the learn dropdown button",
     },
 });
 
@@ -337,6 +345,9 @@ class MenuBar extends React.Component {
     }
     handleClickOpenWiki() {
         window.open("https://wiki.openblock.cc");
+    }
+    handleClickOpenNomoTutorials() {
+        window.open("https://instareducation.com/education-resources/");
     }
     restoreOptionMessage(deletedItem) {
         switch (deletedItem) {
@@ -598,7 +609,7 @@ class MenuBar extends React.Component {
                             />
                         </div>
                     )}{" "}
-                    <div
+                    {/* <div
                         className={classNames(
                             styles.menuBarItem,
                             styles.hoverable,
@@ -607,7 +618,7 @@ class MenuBar extends React.Component {
                         id="bacToHome"
                     >
                         <img className={styles.languageIcon} src={homeIcon} />
-                    </div>
+                    </div> */}
                     {this.props.canManageFiles && (
                         <div className={classNames(styles.menuBarItem)}>
                             <img
@@ -671,7 +682,7 @@ class MenuBar extends React.Component {
                         </MenuBarMenu>
                     </div>
                     <Divider className={classNames(styles.divider)} />
-                    {/* <div
+                    <div
                         className={classNames(
                             styles.menuBarItem,
                             styles.hoverable
@@ -688,8 +699,8 @@ class MenuBar extends React.Component {
                                 id="gui.menuBar.noDeviceSelected"
                             />
                         )}
-                    </div> */}
-                    {/* <Divider className={classNames(styles.divider)} />
+                    </div>
+                    <Divider className={classNames(styles.divider)} />
                     <div
                         className={classNames(
                             styles.menuBarItem,
@@ -718,7 +729,7 @@ class MenuBar extends React.Component {
                                 />
                             </React.Fragment>
                         )}
-                    </div> */}
+                    </div>
                     {/* <div
                         className={classNames(styles.menuBarItem)}
                     >
@@ -730,48 +741,71 @@ class MenuBar extends React.Component {
                 </div>
 
                 <div className={styles.tailMenu}>
-                    {/* <div
-                        aria-label={this.props.intl.formatMessage(
-                            ariaMessages.community
-                        )}
-                        className={classNames(
-                            styles.menuBarItem,
-                            styles.hoverable
-                        )}
-                        onClick={this.handleClickOpenCommunity}
-                    >
-                        <img
-                            className={styles.communityIcon}
-                            src={communityIcon}
-                        />
-                        <FormattedMessage {...ariaMessages.community} />
-                    </div>
                     <div
                         aria-label={this.props.intl.formatMessage(
-                            ariaMessages.wiki
+                            ariaMessages.learn,
                         )}
                         className={classNames(
                             styles.menuBarItem,
-                            styles.hoverable
+                            styles.hoverable,
+                            {[styles.active]: this.props.learnMenuOpen},
                         )}
-                        onClick={this.handleClickOpenWiki}
+                        onMouseUp={this.props.onClickLearn}
                     >
-                        <img className={styles.wikiIcon} src={wikiIcon} />
-                        <FormattedMessage {...ariaMessages.wiki} />
-                    </div> */}
-                    {/* <div
-                        aria-label={this.props.intl.formatMessage(
-                            ariaMessages.tutorials
-                        )}
-                        className={classNames(
-                            styles.menuBarItem,
-                            styles.hoverable
-                        )}
-                        onClick={this.props.onOpenTipLibrary}
-                    >
-                        <img className={styles.helpIcon} src={helpIcon} />
-                        <FormattedMessage {...ariaMessages.tutorials} />
-                    </div> */}
+                        <FormattedMessage {...ariaMessages.learn} />
+                        <MenuBarMenu
+                            className={classNames(styles.menuBarMenu)}
+                            open={this.props.learnMenuOpen}
+                            place={this.props.isRtl ? 'right' : 'left'}
+                            onRequestClose={this.props.onRequestCloseLearn}
+                        >
+                            <MenuSection>
+                                <MenuItem className={styles.disabled}>
+                                    <FormattedMessage
+                                        defaultMessage="Getting started"
+                                        description="Learn menu item for getting started"
+                                        id="gui.menuBar.gettingStarted"
+                                    />
+                                </MenuItem>
+                                <MenuItem
+                                    isRtl={this.props.isRtl}
+                                    onClick={this.props.onOpenTipLibrary}
+                                >
+                                    <FormattedMessage {...ariaMessages.tutorials} />
+                                </MenuItem>
+                                <MenuItem className={styles.disabled}>
+                                    <FormattedMessage
+                                        defaultMessage="Examples (Coming Soon)"
+                                        description="Learn menu item for examples"
+                                        id="gui.menuBar.examples"
+                                    />
+                                </MenuItem>
+                                <MenuItem className={styles.disabled}>
+                                    <FormattedMessage
+                                        defaultMessage="Education Resource (Coming Soon)"
+                                        description="Learn menu item for education resources"
+                                        id="gui.menuBar.educationResource"
+                                    />
+                                </MenuItem>
+                                <MenuItem
+                                    isRtl={this.props.isRtl}
+                                    onClick={this.handleClickOpenNomoTutorials}
+                                >
+                                    <FormattedMessage
+                                        defaultMessage="Online Course"
+                                        description="Learn menu item for nomokit online courses"
+                                        id="gui.menuBar.onlineCourse"
+                                    />
+                                </MenuItem>
+                                <MenuItem
+                                    isRtl={this.props.isRtl}
+                                    onClick={this.handleClickOpenCommunity}
+                                >
+                                    <FormattedMessage {...ariaMessages.community} />
+                                </MenuItem>
+                            </MenuSection>
+                        </MenuBarMenu>
+                    </div>
                     <Divider className={classNames(styles.divider)} />
                     {/* <div
                         className={classNames(
@@ -941,6 +975,7 @@ MenuBar.propTypes = {
     editMenuOpen: PropTypes.bool,
     enableCommunity: PropTypes.bool,
     fileMenuOpen: PropTypes.bool,
+    learnMenuOpen: PropTypes.bool,
     settingMenuOpen: PropTypes.bool,
     intl: intlShape,
     isUpdating: PropTypes.bool,
@@ -967,6 +1002,7 @@ MenuBar.propTypes = {
     onClickAccount: PropTypes.func,
     onClickEdit: PropTypes.func,
     onClickFile: PropTypes.func,
+    onClickLearn: PropTypes.func,
     onClickSetting: PropTypes.func,
     onClickLanguage: PropTypes.func,
     onClickLogin: PropTypes.func,
@@ -988,6 +1024,7 @@ MenuBar.propTypes = {
     onRequestCloseAccount: PropTypes.func,
     onRequestCloseEdit: PropTypes.func,
     onRequestCloseFile: PropTypes.func,
+    onRequestCloseLearn: PropTypes.func,
     onRequestCloseSetting: PropTypes.func,
     onRequestCloseLanguage: PropTypes.func,
     onRequestCloseLogin: PropTypes.func,
@@ -1037,6 +1074,7 @@ const mapStateToProps = (state, ownProps) => {
         fileMenuOpen: fileMenuOpen(state),
         settingMenuOpen: settingMenuOpen(state),
         editMenuOpen: editMenuOpen(state),
+        learnMenuOpen: learnMenuOpen(state),
         isUpdating: getIsUpdating(loadingState),
         isRealtimeMode: state.scratchGui.programMode.isRealtimeMode,
         isRtl: state.locales.isRtl,
@@ -1074,6 +1112,8 @@ const mapDispatchToProps = (dispatch) => ({
     onRequestCloseSetting: () => dispatch(closeSettingMenu()),
     onClickEdit: () => dispatch(openEditMenu()),
     onRequestCloseEdit: () => dispatch(closeEditMenu()),
+    onClickLearn: () => dispatch(openLearnMenu()),
+    onRequestCloseLearn: () => dispatch(closeLearnMenu()),
     onClickLanguage: () => dispatch(openLanguageMenu()),
     onRequestCloseLanguage: () => dispatch(closeLanguageMenu()),
     onClickLogin: () => dispatch(openLoginMenu()),

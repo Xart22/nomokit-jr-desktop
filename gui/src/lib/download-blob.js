@@ -1,6 +1,5 @@
 export default (filename, blob) => {
     const downloadLink = document.createElement("a");
-    downloadLink.id = "linkDownloadProject";
     document.body.appendChild(downloadLink);
 
     // Use special ms version if available to get it working on Edge.
@@ -14,12 +13,12 @@ export default (filename, blob) => {
         downloadLink.href = url;
         downloadLink.download = filename;
         downloadLink.type = blob.type;
-        // downloadLink.click();
+        downloadLink.click();
         // remove the link after a timeout to prevent a crash on iOS 13 Safari
-        // window.setTimeout(() => {
-        //     document.body.removeChild(downloadLink);
-        //     window.URL.revokeObjectURL(url);
-        // }, 1000);
+        window.setTimeout(() => {
+            document.body.removeChild(downloadLink);
+            window.URL.revokeObjectURL(url);
+        }, 1000);
     } else {
         // iOS 12 Safari, open a new page and set href to data-uri
         let popup = window.open("", "_blank");

@@ -24,12 +24,6 @@ import makeymakeyInsetIconURL from './makeymakey/makeymakey-small.svg';
 // import ev3ConnectionIconURL from './ev3/ev3-hub-illustration.svg';
 // import ev3ConnectionSmallIconURL from './ev3/ev3-small.svg';
 
-// import wedo2IconURL from './wedo2/wedo.png'; // TODO: Rename file names to match variable/prop names?
-// import wedo2InsetIconURL from './wedo2/wedo-small.svg';
-// import wedo2ConnectionIconURL from './wedo2/wedo-illustration.svg';
-// import wedo2ConnectionSmallIconURL from './wedo2/wedo-small.svg';
-// import wedo2ConnectionTipIconURL from './wedo2/wedo-button-illustration.svg';
-
 // import boostIconURL from './boost/boost.png';
 // import boostInsetIconURL from './boost/boost-small.svg';
 // import boostConnectionIconURL from './boost/boost-illustration.svg';
@@ -227,37 +221,6 @@ export default [
     //         />
     //     ),
     //     helpLink: 'https://scratch.mit.edu/boost'
-    // },
-    // {
-    //     name: 'LEGO Education WeDo 2.0',
-    //     extensionId: 'wedo2',
-    //     collaborator: 'LEGO',
-    //     iconURL: wedo2IconURL,
-    //     insetIconURL: wedo2InsetIconURL,
-    //     description: (
-    //         <FormattedMessage
-    //             defaultMessage="Build with motors and sensors."
-    //             description="Description for the 'LEGO WeDo 2.0' extension"
-    //             id="gui.extension.wedo2.description"
-    //         />
-    //     ),
-    //     featured: true,
-    //     disabled: false,
-    //     bluetoothRequired: true,
-    //     internetConnectionRequired: true,
-    //     launchPeripheralConnectionFlow: true,
-    //     useAutoScan: true,
-    //     connectionIconURL: wedo2ConnectionIconURL,
-    //     connectionSmallIconURL: wedo2ConnectionSmallIconURL,
-    //     connectionTipIconURL: wedo2ConnectionTipIconURL,
-    //     connectingMessage: (
-    //         <FormattedMessage
-    //             defaultMessage="Connecting"
-    //             description="Message to help people connect to their WeDo."
-    //             id="gui.extension.wedo2.connectingMessage"
-    //         />
-    //     ),
-    //     helpLink: 'https://scratch.mit.edu/wedo'
     // },
     // {
     //     name: 'Go Direct Force & Acceleration',
