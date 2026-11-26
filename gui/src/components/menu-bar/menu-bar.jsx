@@ -134,11 +134,6 @@ const ariaMessages = defineMessages({
         defaultMessage: "Tutorials",
         description: "accessibility text for the tutorials button",
     },
-    community: {
-        id: "gui.menuBar.community",
-        defaultMessage: "Open Community",
-        description: "accessibility text for the community button",
-    },
     wiki: {
         id: "gui.menuBar.wiki",
         defaultMessage: "Wiki",
@@ -219,7 +214,9 @@ class MenuBar extends React.Component {
         bindAll(this, [
             "handleClickNew",
             "handleClickRemix",
-            "handleClickOpenCommunity",
+            "handleClickOpenExamples",
+            "handleClickOpenEducationResources",
+            "handleClickOpenOnlineCourse",
             "handleClickOpenWiki",
             "handleClickSave",
             "handleClickSaveAsCopy",
@@ -340,14 +337,20 @@ class MenuBar extends React.Component {
             this.props.onClickLanguage(e);
         }
     }
-    handleClickOpenCommunity() {
-        window.open("https://community.openblock.cc");
+    handleClickOpenExamples() {
+        window.open("https://nomo-kit.com/community", "_self");
     }
     handleClickOpenWiki() {
         window.open("https://wiki.openblock.cc");
     }
-    handleClickOpenNomoTutorials() {
-        window.open("https://instareducation.com/education-resources/");
+    handleClickOpenEducationResources() {
+        window.open(
+            "https://instareducation.com/education-resources/",
+            "_self"
+        );
+    }
+    handleClickOpenOnlineCourse() {
+        window.open("https://instareducation.com/onlinecoursepage/", "_self");
     }
     restoreOptionMessage(deletedItem) {
         switch (deletedItem) {
@@ -773,35 +776,35 @@ class MenuBar extends React.Component {
                                 >
                                     <FormattedMessage {...ariaMessages.tutorials} />
                                 </MenuItem>
-                                <MenuItem className={styles.disabled}>
+                                <MenuItem
+                                    isRtl={this.props.isRtl}
+                                    onClick={this.handleClickOpenExamples}
+                                >
                                     <FormattedMessage
-                                        defaultMessage="Examples (Coming Soon)"
+                                        defaultMessage="Examples"
                                         description="Learn menu item for examples"
                                         id="gui.menuBar.examples"
                                     />
                                 </MenuItem>
-                                <MenuItem className={styles.disabled}>
+                                <MenuItem
+                                    isRtl={this.props.isRtl}
+                                    onClick={this.handleClickOpenEducationResources}
+                                >
                                     <FormattedMessage
-                                        defaultMessage="Education Resource (Coming Soon)"
+                                        defaultMessage="Education Resources"
                                         description="Learn menu item for education resources"
                                         id="gui.menuBar.educationResource"
                                     />
                                 </MenuItem>
                                 <MenuItem
                                     isRtl={this.props.isRtl}
-                                    onClick={this.handleClickOpenNomoTutorials}
+                                    onClick={this.handleClickOpenOnlineCourse}
                                 >
                                     <FormattedMessage
                                         defaultMessage="Online Course"
                                         description="Learn menu item for nomokit online courses"
                                         id="gui.menuBar.onlineCourse"
                                     />
-                                </MenuItem>
-                                <MenuItem
-                                    isRtl={this.props.isRtl}
-                                    onClick={this.handleClickOpenCommunity}
-                                >
-                                    <FormattedMessage {...ariaMessages.community} />
                                 </MenuItem>
                             </MenuSection>
                         </MenuBarMenu>
